@@ -36,7 +36,7 @@ open dist/Hyper.app
 
 ## CI и версии
 
-GitHub Actions собирает и проверяет `.app` на `push` в `main` и на каждом pull request. Версия хранится в `VERSION` по SemVer; сейчас это `0.1.0`.
+GitHub Actions собирает и проверяет `.app` на `push` в `main` и на каждом pull request. Версия хранится в `VERSION` по SemVer; сейчас это `0.1.1`.
 
 Чтобы выпустить версию:
 

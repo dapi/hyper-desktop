@@ -27,6 +27,10 @@ struct HyperDesktopApp: App {
                 Divider()
                 ForEach(1...9, id: \.self) { number in
                     Button("Перейти к вкладке \(number)") { tabs.select(index: number - 1) }
+                        .keyboardShortcut(
+                            KeyEquivalent(Character(String(number))),
+                            modifiers: .command
+                        )
                 }
             }
         }
@@ -251,6 +255,7 @@ private struct BrowserTabsView: View {
             Divider()
             if let tab = tabs.selectedTab {
                 TabWebView(tab: tab)
+                    .id(tab.id)
             }
         }
     }
