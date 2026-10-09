@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Publish macOS release
+    runs-on: macos-15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Validate SemVer tag
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          tag = os.environ["RELEASE_TAG"]
+          version = Path("VERSION").read_text().strip()
+          pattern = r"v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?"
+          if not re.fullmatch(pattern, tag):
+              raise SystemExit(f"Tag {tag!r} is not a SemVer version prefixed with v")
+          if tag[1:] != version:
+              raise SystemExit(f"Tag {tag!r} must match VERSION ({version!r})")
+          PY
+
+      - name: Build app bundle
+        run: ./scripts/package-app.sh
+
+      - name: Archive app and checksum
+        id: archive
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          asset="dist/Hyper-${RELEASE_TAG}-macOS-arm64.zip"
+          ditto -c -k --sequesterRsrc --keepParent dist/Hyper.app "$asset"
+          shasum -a 256 "$asset" > "$asset.sha256"
+          echo "asset=$asset" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          ASSET: ${{ steps.archive.outputs.asset }}
+        run: |
+          gh release create "$RELEASE_TAG" "$ASSET" "$ASSET.sha256" \
+            --verify-tag \
+            --title "Hyper Desktop ${RELEASE_TAG#v}" \
+            --generate-notes

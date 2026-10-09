@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build macOS app
+    runs-on: macos-15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Package app
+        run: ./scripts/package-app.sh
+
+      - name: Verify app bundle
+        run: |
+          test -s dist/Hyper.app/Contents/MacOS/HyperDesktop
+          test -s dist/Hyper.app/Contents/Resources/AppIcon.icns
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' dist/Hyper.app/Contents/Info.plist | grep -Fx "$(cat VERSION)"
+          codesign --verify --deep --strict dist/Hyper.app
