@@ -6,8 +6,6 @@
 
 ![Демонстрационный экран Hyper Desktop с тестовыми данными](docs/hyper-desktop-preview.png)
 
-Иконка приложения: ![Hyper Desktop icon](Assets/AppIcon.png)
-
 ## Вкладки
 
 - `⌘T` — новая вкладка.
