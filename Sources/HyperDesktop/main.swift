@@ -25,8 +25,9 @@ struct HyperDesktopApp: App {
                 Button("Новая вкладка") { tabs.newTab() }
                 Button("Закрыть вкладку") { tabs.closeSelected() }
                 Divider()
-                Button("Перейти к вкладке 1") { tabs.select(index: 0) }
-                Button("Перейти к вкладке 2") { tabs.select(index: 1) }
+                ForEach(1...9, id: \.self) { number in
+                    Button("Перейти к вкладке \(number)") { tabs.select(index: number - 1) }
+                }
             }
         }
     }
@@ -204,14 +205,10 @@ private struct HyperWindow: View {
             case "w":
                 Task { @MainActor in tabs.closeSelected() }
                 return nil
-            case "1":
-                Task { @MainActor in tabs.select(index: 0) }
-                return nil
-            case "2":
-                Task { @MainActor in tabs.select(index: 1) }
-                return nil
             default:
-                return event
+                guard let number = Int(key), (1...9).contains(number) else { return event }
+                Task { @MainActor in tabs.select(index: number - 1) }
+                return nil
             }
         }
     }
