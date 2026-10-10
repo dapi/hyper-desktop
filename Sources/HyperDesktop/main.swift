@@ -23,6 +23,8 @@ struct HyperDesktopApp: App {
         .commands {
             CommandMenu("Вкладки") {
                 Button("Новая вкладка") { tabs.newTab() }
+                Button("Перезагрузить экран") { tabs.reloadSelected() }
+                    .keyboardShortcut("r", modifiers: .command)
                 Button("Закрыть вкладку") { tabs.closeSelected() }
                 Divider()
                 ForEach(1...9, id: \.self) { number in
@@ -94,6 +96,10 @@ private final class HyperTabStore: ObservableObject {
     func select(_ tab: HyperTab) {
         selectedID = tab.id
         if serverReady { tab.loadIfNeeded() }
+    }
+
+    func reloadSelected() {
+        selectedTab?.webView.reload()
     }
 
     func closeSelected() {
