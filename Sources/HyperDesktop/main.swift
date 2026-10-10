@@ -106,7 +106,7 @@ private final class HyperTabStore: ObservableObject {
         guard let selectedID, let index = tabs.firstIndex(where: { $0.id == selectedID }) else { return }
         tabs.remove(at: index)
         if tabs.isEmpty {
-            NSApp.keyWindow?.close()
+            self.selectedID = nil
         } else {
             self.selectedID = tabs[min(index, tabs.count - 1)].id
         }
@@ -117,7 +117,7 @@ private final class HyperTabStore: ObservableObject {
         let wasSelected = selectedID == tab.id
         tabs.remove(at: index)
         guard !tabs.isEmpty else {
-            NSApp.keyWindow?.close()
+            selectedID = nil
             return
         }
         if wasSelected { selectedID = tabs[min(index, tabs.count - 1)].id }
@@ -257,11 +257,21 @@ private struct BrowserTabsView: View {
                 .padding(.vertical, 5)
             }
             .scrollIndicators(.hidden)
+            .frame(height: 40)
 
             Divider()
             if let tab = tabs.selectedTab {
                 TabWebView(tab: tab)
                     .id(tab.id)
+            } else {
+                VStack(spacing: 12) {
+                    Text("Нет открытых вкладок")
+                        .font(.title3)
+                        .foregroundStyle(.secondary)
+                    Button("Новая вкладка") { tabs.newTab() }
+                        .buttonStyle(.borderedProminent)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
     }
